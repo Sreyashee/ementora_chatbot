@@ -2,53 +2,49 @@ const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 
-// ✅ Correct API endpoint
-const BACKEND_URL = 'https://ementora-chatbot.onrender.com/api/chat';
-
 chatForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const message = userInput.value.trim();
   if (!message) return;
 
+  // Show user message
   chatBox.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
-  showTypingIndicator();
+
 
   try {
-    const response = await fetch(BACKEND_URL, {
+     showTypingIndicator();
+
+    const response = await fetch('https://ementora-chatbot.onrender.com/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: message })
+      body: JSON.stringify({ prompt: message }) // 👈 This must match backend
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
 
     const data = await response.json();
     const reply = data.reply;
 
     setTimeout(() => {
-      hideTypingIndicator();
+  hideTypingIndicator(); // Remove typing dots
 
-      const botDiv = document.createElement('div');
-      botDiv.classList.add('message', 'bot');
-      botDiv.innerHTML = `<strong>Bot:</strong> ${reply}`;
-      chatBox.appendChild(botDiv);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }, 1000);
+  const botDiv = document.createElement('div');
+  botDiv.classList.add('message', 'bot');
+  botDiv.innerHTML = `<strong>Bot:</strong> ${reply}`;
+  chatBox.appendChild(botDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}, 1000);
+    //chatBox.innerHTML += `<div class="message bot"><strong>Bot:</strong> ${reply}</div>`;
 
   } catch (error) {
-    hideTypingIndicator();
-    chatBox.innerHTML += `<div class="error-message">Something went wrong. Please try again.</div>`;
+    chatBox.innerHTML += `<div class="error-message">Something went wrong.</div>`;
     console.error('Error:', error);
   }
 
   userInput.value = '';
   chatBox.scrollTop = chatBox.scrollHeight;
 });
-
 function showTypingIndicator() {
+  const chatBox = document.getElementById('chat-box');
   const typing = document.createElement('div');
   typing.classList.add('bot-message', 'typing-indicator');
   typing.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
@@ -60,5 +56,7 @@ function hideTypingIndicator() {
   const indicator = document.querySelector('.typing-indicator');
   if (indicator) indicator.remove();
 }
+
+
 
 
